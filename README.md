@@ -9,6 +9,7 @@ i added a password somewhere called
    x Enable the necessary APIs: Compute Engine API, Cloud Run API, Cloud SQL API, Secret Manager API, and Vertex AI API.
    
    x Create a Cloud SQL for PostgreSQL instance for the database.
+   
       --funnypage=sql
       
    * Create a Secret Manager secret to store the database credentials.
