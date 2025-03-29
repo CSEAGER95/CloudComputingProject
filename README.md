@@ -3,13 +3,19 @@ i added a password somewhere called
 # CloudComputingProject
  AI story generator that creates satire stories based on prompts given by the users.
  1. Set up the infrastructure:
+    
    x Create a new Google Cloud project if you don't have one already.
+   
    x Enable the necessary APIs: Compute Engine API, Cloud Run API, Cloud SQL API, Secret Manager API, and Vertex AI API.
+   
    x Create a Cloud SQL for PostgreSQL instance for the database.
       --funnypage=sql
+      
    * Create a Secret Manager secret to store the database credentials.
    x Create a Cloud Storage bucket to store any static assets or user-uploaded content.
+
       --funnypage=bucket
+     
 2. Deploy the backend:
    x Develop the backend application using a language like Python or Node.js.
    * Implement the story generation logic using the Gemini API.
