@@ -1,5 +1,3 @@
-i added a password somewhere called 
-
 # CloudComputingProject
  AI story generator that creates satire stories based on prompts given by the users.
  1. Set up the infrastructure:
