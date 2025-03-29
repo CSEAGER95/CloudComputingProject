@@ -12,6 +12,7 @@ i added a password somewhere called
       --funnypage=sql
       
    * Create a Secret Manager secret to store the database credentials.
+
    x Create a Cloud Storage bucket to store any static assets or user-uploaded content.
 
       --funnypage=bucket
