@@ -1,5 +1,3 @@
-package edu.appstate.cs.cloud.restful;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -17,7 +15,7 @@ import javax.sql.DataSource;
 
 @SpringBootApplication
 @RestController
-public class funnypage {
+public class UserInputController {
     private static String logClass = "UserInputController";
     private Logger logger = LoggerFactory.getLogger(logClass);
     
