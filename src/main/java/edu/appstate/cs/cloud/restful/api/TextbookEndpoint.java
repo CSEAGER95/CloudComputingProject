@@ -52,7 +52,7 @@ public class TextbookEndpoint {
                 .withPublisher("Elsevier")
                 .withYear(2015)
                 // TODO: Replace this with your own image, which can just be a copy of this one!
-                .withImageLink("https://storage.googleapis.com/cloud-spring-2025-hills-hw3/book-cover-002.jpeg")
+                .withImageLink("https://storage.googleapis.com/cosmic-stacker-textbook-covers/20241225_100034.jpg")
                 .build());
 
         textbooks.add(new Textbook.Builder()
@@ -62,7 +62,7 @@ public class TextbookEndpoint {
                 .withPublisher("Pearson")
                 .withYear(2016)
                 // TODO: Replace this with your own image, which can just be a copy of this one!
-                .withImageLink("https://storage.googleapis.com/cloud-spring-2025-hills-hw3/book-cover-003.jpeg")
+                .withImageLink("https://storage.googleapis.com/cosmic-stacker-textbook-covers/20240929_212034.jpg")
                 .build());
 
         textbooks.add(new Textbook.Builder()
@@ -72,7 +72,7 @@ public class TextbookEndpoint {
                 .withPublisher("Springer")
                 .withYear(2017)
                 // TODO: Replace this with your own image, which can just be a copy of this one!
-                .withImageLink("https://storage.googleapis.com/cloud-spring-2025-hills-hw3/book-cover-004.jpeg")
+                .withImageLink("https://storage.googleapis.com/cosmic-stacker-textbook-covers/IMG_8340%5B1%5D.jpg")
                 .build());
 
         for (Textbook t : textbooks) {
