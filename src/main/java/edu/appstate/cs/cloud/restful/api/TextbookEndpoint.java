@@ -1,16 +1,17 @@
 package edu.appstate.cs.cloud.restful.api;
 
-import edu.appstate.cs.cloud.restful.datastore.TextbookService;
-import edu.appstate.cs.cloud.restful.models.Textbook;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import edu.appstate.cs.cloud.restful.datastore.TextbookService;
+import edu.appstate.cs.cloud.restful.models.Textbook;
 
 @RestController
 @RequestMapping(value = "/textbooks")
@@ -41,7 +42,7 @@ public class TextbookEndpoint {
                 .withPublisher("Wiley")
                 .withYear(2018)
                 // TODO: Replace this with your own image, which can just be a copy of this one!
-                .withImageLink("https://storage.googleapis.com/cloud-spring-2025-hills-hw3/book-cover-001.jpeg")
+                .withImageLink("https://storage.googleapis.com/cosmic-stacker-textbook-covers/20250328_172513.jpg")
                 .build());
 
         textbooks.add(new Textbook.Builder()

@@ -1,15 +1,15 @@
 package edu.appstate.cs.cloud.restful.api;
 
-import edu.appstate.cs.cloud.restful.datastore.SubjectService;
-import edu.appstate.cs.cloud.restful.models.Subject;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import edu.appstate.cs.cloud.restful.datastore.SubjectService;
+import edu.appstate.cs.cloud.restful.models.Subject;
 
 @RestController
 @RequestMapping(value = "/subjects")
@@ -19,10 +19,7 @@ public class SubjectEndpoint {
 
     @GetMapping
     public List<Subject> getAllSubjects() {
-        // TODO: What code is needed here to return all subjects?
-
-        // TODO: You can remove this return statement once you are returning something valid.
-        return Collections.emptyList();
+        return subjectService.getAllSubjects();
     }
 
     @GetMapping(value = "/init")
@@ -35,8 +32,10 @@ public class SubjectEndpoint {
         subjects.add(new Subject.Builder().withSubjectName("English").build());
         subjects.add(new Subject.Builder().withSubjectName("History").build());
 
-        // TODO: Is something missing here? If so, add the missing code...
-
+        // Add after the subjects list creation
+        for (Subject s : subjects) {
+            subjectService.createSubject(s);
+        }
         return true;
     }
 }

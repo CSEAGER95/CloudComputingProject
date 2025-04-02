@@ -4,10 +4,14 @@ import com.google.cloud.datastore.*;
 import edu.appstate.cs.cloud.restful.models.Textbook;
 import org.springframework.stereotype.Service;
 
+import java.security.Key;
+import java.security.KeyFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.management.Query;
 
 @Service
 public class TextbookService {
@@ -38,13 +42,12 @@ public class TextbookService {
     }
 
     public List<Textbook> getAllTextbooksForSubject(String subject) {
-        // TODO: What code needs to be added here to retrieve textbooks for a given subject?
-        // HINT: Look at the code linked on AsULearn, we need to filter our results. You need
-        // to do this filtering in the query, you CANNOT just grab everything and then filter
-        // it here using Java code.
-
-        // TODO: Remove this return statement once you have something valid to return
-        return Collections.emptyList();
+        Query<Entity> query = Query.newEntityQueryBuilder()
+            .setKind(ENTITY_KIND)
+            .setFilter(StructuredQuery.PropertyFilter.eq(Textbook.SUBJECT, subject))
+            .build();
+        Iterator<Entity> entities = datastore.run(query);
+        return buildTextbooks(entities);
     }
 
     private List<Textbook> buildTextbooks(Iterator<Entity> entities) {

@@ -1,28 +1,52 @@
 package edu.appstate.cs.cloud.restful.datastore;
 
-import com.google.cloud.datastore.*;
-import edu.appstate.cs.cloud.restful.models.Subject;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
+
+import edu.appstate.cs.cloud.restful.models.Subject;
 
 @Service
 public class SubjectService {
-    // TODO: What is needed here?
+    private Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final String ENTITY_KIND = "Subject";
+    private final KeyFactory keyFactory = datastore.newKeyFactory().setKind(ENTITY_KIND);
 
     public Key createSubject(Subject subject) {
-        // TODO: What code needs to be added here to create a subject?
-        return null;
+        Key key = datastore.allocateId(keyFactory.newKey());
+        Entity subjectEntity = Entity.newBuilder(key)
+                .set(Subject.SUBJECT_NAME, subject.getSubjectName())
+                .build();
+        datastore.put(subjectEntity);
+        return key;
     }
 
     public List<Subject> getAllSubjects() {
-        // TODO: What code needs to be added here to retrieve all subjects?
-
-        // TODO: Remove this return statement once you have something valid to return
-        return Collections.emptyList();
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind(ENTITY_KIND)
+                .build();
+        Iterator<Entity> entities = datastore.run(query);
+        return buildSubjects(entities);
     }
 
-    // TODO: What support methods are needed here?
-    // Feel free to look at the other service classes for inspiration.
+    private List<Subject> buildSubjects(Iterator<Entity> entities) {
+        List<Subject> subjects = new ArrayList<>();
+        entities.forEachRemaining(entity -> subjects.add(entityToSubject(entity)));
+        return subjects;
+    }
+
+    private Subject entityToSubject(Entity entity) {
+        return new Subject.Builder()
+                .withSubjectName(entity.getString(Subject.SUBJECT_NAME))
+                .build();
+    }
 }
