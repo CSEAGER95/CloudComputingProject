@@ -73,11 +73,7 @@
 			<artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
 			<version>${spring-cloud-gcp.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.google.cloud.sql</groupId>
-			<artifactId>cloud-sql-connector-jdbc-core</artifactId>
-			<version>1.15.1</version>
-		</dependency>
+
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>

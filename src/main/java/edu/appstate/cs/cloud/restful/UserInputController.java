@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
-@SpringBootApplication
 @RestController
 public class UserInputController {
     private static String logClass = "UserInputController";
@@ -19,10 +18,6 @@ public class UserInputController {
     
     @Autowired
     private UserInputRepository userInputRepository;
-    
-    public static void main(String[] args) {
-        SpringApplication.run(UserInputController.class, args);
-    }
     
     // Simple GET endpoint that receives inputs via query parameter
     @GetMapping("/input")
