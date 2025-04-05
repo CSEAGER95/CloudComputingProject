@@ -13,40 +13,40 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 
-import edu.appstate.cs.cloud.restful.models.Subject;
+import edu.appstate.cs.cloud.restful.models.Prompt;
 
 @Service
-public class SubjectService {
+public class PromptService {
     private Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-    private static final String ENTITY_KIND = "Subject";
+    private static final String ENTITY_KIND = "prompt";
     private final KeyFactory keyFactory = datastore.newKeyFactory().setKind(ENTITY_KIND);
 
-    public Key createSubject(Subject subject) {
+    public Key createPrompt(Prompt prompt) {
         Key key = datastore.allocateId(keyFactory.newKey());
-        Entity subjectEntity = Entity.newBuilder(key)
-                .set(Subject.SUBJECT_NAME, subject.getSubjectName())
+        Entity promptEntity = Entity.newBuilder(key)
+                .set(Prompt.PROMPT, prompt.getPrompt())
                 .build();
-        datastore.put(subjectEntity);
+        datastore.put(promptEntity);
         return key;
     }
 
-    public List<Subject> getAllSubjects() {
+    public List<Prompt> getAllPrompts() {
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind(ENTITY_KIND)
                 .build();
         Iterator<Entity> entities = datastore.run(query);
-        return buildSubjects(entities);
+        return buildPrompts(entities);
     }
 
-    private List<Subject> buildSubjects(Iterator<Entity> entities) {
-        List<Subject> subjects = new ArrayList<>();
-        entities.forEachRemaining(entity -> subjects.add(entityToSubject(entity)));
-        return subjects;
+    private List<Prompt> buildPrompts(Iterator<Entity> entities) {
+        List<Prompt> prompts = new ArrayList<>();
+        entities.forEachRemaining(entity -> prompts.add(entityToPrompt(entity)));
+        return prompts;
     }
 
-    private Subject entityToSubject(Entity entity) {
-        return new Subject.Builder()
-                .withSubjectName(entity.getString(Subject.SUBJECT_NAME))
+    private Prompt entityToPrompt(Entity entity) {
+        return new Prompt.Builder()
+                .withPrompt(entity.getString(Prompt.PROMPT))
                 .build();
     }
 }
