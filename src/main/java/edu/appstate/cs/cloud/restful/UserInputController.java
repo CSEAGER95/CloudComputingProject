@@ -74,8 +74,8 @@ public class UserInputController {
         logger.info(String.format("Retrieving input with ID: %d", id));
         
         return userInputRepository.findById(id)
-            .map(input -> ResponseEntity.ok(input))
+            .map(input -> ResponseEntity.ok().body(input))
             .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap("error", "Input not found")));
+                .body(null));
     }
 }
