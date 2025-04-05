@@ -10,7 +10,7 @@ public interface UserInputRepository extends JpaRepository<UserInput, Integer> {
     // You can add custom query methods here if needed
 
     // Custom query to fetch user inputs by a specific criterion (e.g., type or status)
-    List<UserInput> findByType(String type);
+    //List<UserInput> findByType(String type);
 
     // Placeholder for processing logic to generate satirical AI stories
     // This logic should be implemented in the service layer or a utility class
