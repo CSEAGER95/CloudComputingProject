@@ -1,4 +1,4 @@
-package src.main.java;
+package edu.appstate.cs.cloud.restful;
 
 import jakarta.persistence.*;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package src.main.java;
+package edu.appstate.cs.cloud.restful;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
