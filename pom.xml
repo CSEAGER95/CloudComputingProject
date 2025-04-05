@@ -69,14 +69,14 @@
 			<version>${spring-cloud-gcp.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
-			<version>8.0.33</version>
-		</dependency>
-		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
 			<version>${spring-cloud-gcp.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.cloud.sql</groupId>
+			<artifactId>cloud-sql-connector-jdbc-core</artifactId>
+			<version>1.15.1</version>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
@@ -90,6 +90,13 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<id>google-cloud-sql-connector</id>
+			<url>https://repo1.maven.org/maven2/</url>
+		</repository>
+	</repositories>
 
 	<build>
 		<plugins>
