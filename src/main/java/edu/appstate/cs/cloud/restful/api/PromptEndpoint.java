@@ -3,9 +3,10 @@ package edu.appstate.cs.cloud.restful.api;
 import edu.appstate.cs.cloud.restful.datastore.PromptService;
 import edu.appstate.cs.cloud.restful.models.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +22,14 @@ public class PromptEndpoint {
         return PromptService.getAllPrompts();
     }
 
-    @GetMapping(value = "/init")
-    public boolean initCourses() {
-        // Create some sample courses
-        return true;
+    @PostMapping(value = "/story")
+    public ResponseEntity<Prompt> addStory(@RequestBody Prompt prompt) {
+        try {
+            PromptService.createPrompt(prompt);
+            return new ResponseEntity<>(prompt, HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.err.println("Error adding story: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
