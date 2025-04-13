@@ -28,10 +28,7 @@ const Form: React.FC = () => {
 
     try {
       // TODO: replace with actual post message once the endpoint is ready
-      const response = await axios.post('https://api.example.com/messages', {
-        message: data.message,
-        timestamp: new Date().toISOString(),
-      });
+      const response = await axios.get('https://teamprojectmccewenseager.ue.r.appspot.com/prompt');
       
       // Handle successful response
       console.log('Message sent successfully:', response.data);
