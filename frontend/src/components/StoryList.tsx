@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Button from './Button';
-
-interface Story {
-  id: string;
-  prompt: string;
-  story: string;
-  upvotes: number;
-  downvotes: number;
-}
+import apiService, { Story } from '../services/apiService';
 
 const StoryList: React.FC = () => {
   const [stories, setStories] = useState<Story[]>([]);
@@ -19,8 +11,8 @@ const StoryList: React.FC = () => {
   const fetchStories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://teamprojectmccewenseager.ue.r.appspot.com/prompt');
-      setStories(response.data);
+      const data = await apiService.getStories();
+      setStories(data);
       setError(null);
     } catch (err) {
       console.error('Error fetching stories:', err);
@@ -41,12 +33,12 @@ const StoryList: React.FC = () => {
 
   const handleUpvote = async (storyId: string) => {
     try {
-      await axios.post(`https://teamprojectmccewenseager.ue.r.appspot.com/prompt/upvote/${storyId}`);
+      const updatedStory = await apiService.upvoteStory(storyId);
       // Update the story in the local state
       setStories(prevStories => 
         prevStories.map(story => 
           story.id === storyId 
-            ? { ...story, upvotes: story.upvotes + 1 }
+            ? updatedStory
             : story
         )
       );
@@ -58,12 +50,12 @@ const StoryList: React.FC = () => {
 
   const handleDownvote = async (storyId: string) => {
     try {
-      await axios.post(`https://teamprojectmccewenseager.ue.r.appspot.com/prompt/downvote/${storyId}`);
+      const updatedStory = await apiService.downvoteStory(storyId);
       // Update the story in the local state
       setStories(prevStories => 
         prevStories.map(story => 
           story.id === storyId 
-            ? { ...story, downvotes: story.downvotes + 1 }
+            ? updatedStory
             : story
         )
       );
