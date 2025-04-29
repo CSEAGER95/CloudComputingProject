@@ -1,0 +1,21 @@
+{
+  "name": "cloudcomputingproject-main",
+  "version": "1.0.0",
+  "description": "4/9\r added a /story postmapping so we can upload prompts to the datastore file using {url}/post/story",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ASU-Cloud-Computing/McSeager-Spring-2025.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ASU-Cloud-Computing/McSeager-Spring-2025/issues"
+  },
+  "homepage": "https://github.com/ASU-Cloud-Computing/McSeager-Spring-2025#readme"
+}
