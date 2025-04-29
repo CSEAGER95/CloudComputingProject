@@ -1,124 +1,32 @@
-import React, { useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import axios from 'axios';
-import Button from './Button';
+# Stage 1: Build the React application
+FROM node:20-alpine as build
 
-interface FormInputs {
-  prompt: string;
-}
+# Set working directory
+WORKDIR /app
 
-const Form: React.FC = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<string | null>(null);
-  
-  const { register, handleSubmit, formState: { errors }, watch, reset } = useForm<FormInputs>({
-    mode: 'onChange',
-    defaultValues: {
-      prompt: ''
-    }
-  });
-  
-  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    if (data.prompt.length < 10) {
-      alert('Prompt must be at least 10 characters long');
-      return;
-    }
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-    if (data.prompt.length > 1000) {
-      alert('Prompt cannot be more than 1000 characters long');
-      return;
-    }
+# Install dependencies
+RUN npm install
 
-    setIsSubmitting(true);
-    setSubmissionResult(null);
+# Copy all files
+COPY . .
 
-    try {
-      // API endpoint for creating a new story
-      const response = await axios.post(
-        'https://teamprojectmccewenseager.ue.r.appspot.com/prompt/story',
-        { prompt: data.prompt }
-      );
-      
-      // Handle successful response
-      console.log('Prompt sent successfully:', response.data);
-      setSubmissionResult('Your prompt was submitted successfully! Check the stories list to see it once it generates.');
-      
-      // Reset the form
-      reset();
-    } catch (error) {
-      console.error('Error sending prompt:', error);
-      setSubmissionResult('There was an error submitting your prompt. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+# Build the application
+RUN npm run build
 
-  const promptLength = watch('prompt')?.length || 0;
-  const isValid = promptLength >= 10;
+# Stage 2: Serve the built application
+FROM nginx:alpine
 
-  return (
-    <div className="form-container" style={{ maxWidth: '500px', margin: '0 auto' }}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="prompt" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Enter a news headline or topic for satire generation
-          </label>
-          <textarea
-            id="prompt"
-            {...register('prompt', { 
-              required: 'Prompt is required',
-              minLength: {
-                value: 10,
-                message: 'Prompt must be at least 10 characters long'
-              }
-            })}
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '4px',
-              border: errors.prompt ? '1px solid red' : '1px solid #ccc',
-              minHeight: '100px'
-            }}
-          />
-          {errors.prompt && (
-            <p style={{ color: 'red', fontSize: '14px', margin: '5px 0' }}>
-              {errors.prompt.message}
-            </p>
-          )}
-          <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-            Characters: {promptLength}/10 minimum
-          </div>
-        </div>
+# Copy the build output to replace the default nginx contents
+COPY --from=build /app/build /usr/share/nginx/html
 
-        <div style={{ marginTop: '20px' }}>
-          <Button 
-            text={isSubmitting ? "Submitting..." : "Generate Satire Article"} 
-            type="submit"
-            disabled={!isValid || isSubmitting}
-            style={{
-              opacity: (!isValid || isSubmitting) ? '0.5' : '1',
-              cursor: (!isValid || isSubmitting) ? 'not-allowed' : 'pointer',
-              backgroundColor: '#0070f3',
-              width: '100%'
-            }}
-          />
-        </div>
-      </form>
-      
-      {submissionResult && (
-        <div 
-          style={{ 
-            marginTop: '20px', 
-            padding: '10px', 
-            backgroundColor: submissionResult.includes('error') ? '#ffe6e6' : '#e6ffe6',
-            borderRadius: '4px'
-          }}
-        >
-          {submissionResult}
-        </div>
-      )}
-    </div>
-  );
-};
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-export default Form;
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx server
+CMD ["nginx", "-g", "daemon off;"]
