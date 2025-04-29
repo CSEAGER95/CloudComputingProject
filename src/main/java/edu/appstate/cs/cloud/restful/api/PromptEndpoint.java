@@ -1,16 +1,14 @@
 package edu.appstate.cs.cloud.restful.api;
 
-import edu.appstate.cs.cloud.restful.datastore.PromptService;
-import edu.appstate.cs.cloud.restful.models.Story;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import org.springframework.http.HttpStatus;
-
-import java.util.List;
-import java.util.Map;
+import edu.appstate.cs.cloud.restful.datastore.PromptService;
+import edu.appstate.cs.cloud.restful.models.Prompt;
 
 @RestController
 @RequestMapping(value = "/prompt")
@@ -19,31 +17,14 @@ public class PromptEndpoint {
     private PromptService PromptService;
 
     @GetMapping
-    public ResponseEntity<?> getAllPrompts() {
-        try {
-            List<Story> stories = PromptService.getAllStories();
-            return new ResponseEntity<>(stories, HttpStatus.OK);
-        } catch (Exception e) {
-            System.err.println("Error retrieving stories: " + e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public List<Prompt> getAllPrompts() {
+        return PromptService.getAllPrompts();
     }
 
-    @PostMapping(value = "/story")
-    public ResponseEntity<?> addStory(@RequestBody Map<String, String> requestBody) {
-        try {
-            // Extract prompt from the request body
-            String prompt = requestBody.get("prompt");
-            if (prompt == null || prompt.trim().isEmpty()) {
-                return new ResponseEntity<>("Prompt cannot be empty", HttpStatus.BAD_REQUEST);
-            }
-            
-            Story story = PromptService.createStory(prompt);
-            return new ResponseEntity<>(story, HttpStatus.CREATED);
-        } catch (Exception e) {
-            System.err.println("Error adding story: " + e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @GetMapping(value = "/init")
+    public boolean initCourses() {
+        // Create some sample courses
+        return true;
     }
     
     @PostMapping(value = "/upvote/{storyId}")

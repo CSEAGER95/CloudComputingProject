@@ -1,26 +1,33 @@
-# Dependencies
-node_modules
-npm-debug.log
-yarn-debug.log
-yarn-error.log
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Production
-build
-dist
+# testing
+/coverage
 
-# Development
-.git
-.github
-.gitignore
+# production
+/build
+
+# misc
+.DS_Store
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Testing
-coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Misc
-README.md
-LICENSE
-.DS_Store
+# Git files
+.git
+.gitignore
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# IDE files
+/.idea
+/.vscode

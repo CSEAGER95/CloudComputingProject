@@ -24,7 +24,13 @@ gcloud run deploy $SERVICE_NAME \
   --platform managed \
   --region $REGION \
   --allow-unauthenticated \
-  --project $PROJECT_ID
+  --project $PROJECT_ID \
+  --set-env-vars "REACT_APP_API_URL=https://teamprojectmccewenseager.ue.r.appspot.com" \
+  --memory 512Mi \
+  --cpu 1 \
+  --min-instances 0 \
+  --max-instances 2 \
+  --concurrency 80
 
 echo "Deployment complete! Your application should be available soon at:"
 gcloud run services describe $SERVICE_NAME --platform managed --region $REGION --format 'value(status.url)'
