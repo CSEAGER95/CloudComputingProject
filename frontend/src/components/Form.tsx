@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import axios from 'axios';
 import Button from './Button';
+import apiService from '../services/apiService';
 
 interface FormInputs {
   prompt: string;
@@ -33,14 +33,11 @@ const Form: React.FC = () => {
     setSubmissionResult(null);
 
     try {
-      // API endpoint for creating a new story
-      const response = await axios.post(
-        'https://teamprojectmccewenseager.ue.r.appspot.com/prompt/story',
-        { prompt: data.prompt }
-      );
+      // Use the API service to create a new story
+      const createdStory = await apiService.createStory(data.prompt);
       
       // Handle successful response
-      console.log('Prompt sent successfully:', response.data);
+      console.log('Prompt sent successfully:', createdStory);
       setSubmissionResult('Your prompt was submitted successfully! Check the stories list to see it once it generates.');
       
       // Reset the form
