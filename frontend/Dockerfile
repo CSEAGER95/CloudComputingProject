@@ -1,32 +1,30 @@
-# Stage 1: Build the React application
-FROM node:20-alpine as build
-
-# Set working directory
+# Build stage
+FROM node:18-alpine AS build
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy all files
+# Copy source code
 COPY . .
 
 # Build the application
 RUN npm run build
 
-# Stage 2: Serve the built application
+# Production stage
 FROM nginx:alpine
-
-# Copy the build output to replace the default nginx contents
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# NGINX configuration for Single Page Application
+RUN echo 'server {\
+    listen 80;\
+    location / {\
+        root /usr/share/nginx/html;\
+        index index.html;\
+        try_files $uri $uri/ /index.html;\
+    }\
+}' > /etc/nginx/conf.d/default.conf
 
-# Expose port 80
 EXPOSE 80
-
-# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]
