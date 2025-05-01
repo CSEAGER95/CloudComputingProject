@@ -1,17 +1,7 @@
-4/9
-added a /story postmapping so we can upload prompts to the datastore file using {url}/post/story
+deploy and containerize frontend with powershell: "C:\Program Files\Git\bin\bash.exe" -c "./deploy-to-cloud-run.sh"
 
-can test in postman with a [post request like
+or git ./deploy-to-cloud-run.sh
 
-{
-  "prompt": "Write a story about a dragon who loves to bake cookies."
-}
+from /backend: mvn clean package appengine:deploy -DskipTests
 
-you can create entities from the SDK and see the value by typing {url}/{entity name}
-
-TODO:
-1.front end that accepts an input and and pushes it to the datastore table using /post/story endpoint
-
-2. use the Gemeni to take prompts and generate news stories that get uploaded to another table
-
-3. containerize the application with Docker.
+both frontend and backend are containerized and uploaded to GCP, Connected to sql database, just need to get the whole thing to work. currently the website isnt displaying any stories and its not clearly receiving anything.

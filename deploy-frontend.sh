@@ -8,10 +8,17 @@ PROJECT_ID="teamprojectmccewenseager"
 REGION="us-east1"
 SERVICE_NAME="mcseager-frontend"
 IMAGE_NAME="gcr.io/$PROJECT_ID/$SERVICE_NAME:latest"
+API_URL="https://teamprojectmccewenseager.ue.r.appspot.com"
 
-# Build the Docker image
+# Make sure gcloud is configured with the correct project
+gcloud config set project $PROJECT_ID
+
+# Navigate to frontend directory
+cd frontend
+
+# Build the Docker image with the API URL
 echo "Building Docker image..."
-docker build -t $IMAGE_NAME ./frontend
+docker build -t $IMAGE_NAME --build-arg REACT_APP_API_URL=$API_URL .
 
 # Push the image to Google Container Registry
 echo "Pushing image to Google Container Registry..."
@@ -25,7 +32,6 @@ gcloud run deploy $SERVICE_NAME \
   --region $REGION \
   --allow-unauthenticated \
   --project $PROJECT_ID \
-  --set-env-vars "REACT_APP_API_URL=https://teamprojectmccewenseager.ue.r.appspot.com" \
   --memory 512Mi \
   --cpu 1 \
   --min-instances 0 \
