@@ -12,7 +12,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StringValue;
 
 import edu.appstate.cs.cloud.restful.models.Prompt;
 import edu.appstate.cs.cloud.restful.models.Story;
@@ -102,5 +101,34 @@ public class PromptService {
                 .withUpvotes(entity.getLong(Story.Upvotes))
                 .withDownvotes(entity.getLong(Story.Downvotes))
                 .build();
+    }
+
+    public Story saveStory(Story story) {
+        // Generate a unique ID
+        Key key = datastore.allocateId(storyKeyFactory.newKey());
+        
+        Entity storyEntity = Entity.newBuilder(key)
+                .set(Story.Prompt, story.getPrompt())
+                .set(Story.Story, story.getStory())
+                .set(Story.Upvotes, 0L)
+                .set(Story.Downvotes, 0L)
+                .build();
+        
+        datastore.put(storyEntity);
+        
+        // Set the generated ID in the story object
+        story.setId(key.getName());
+        return story;
+    }
+
+    public List<Story> getAllStories() {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind(STORY_KIND)
+                .build();
+        Iterator<Entity> entities = datastore.run(query);
+        
+        List<Story> stories = new ArrayList<>();
+        entities.forEachRemaining(entity -> stories.add(entityToStory(entity)));
+        return stories;
     }
 }
