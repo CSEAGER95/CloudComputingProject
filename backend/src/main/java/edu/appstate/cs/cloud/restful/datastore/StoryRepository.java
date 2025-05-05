@@ -1,0 +1,1 @@
+package edu.appstate.cs.cloud.restful.datastore;import org.springframework.data.jpa.repository.JpaRepository;import edu.appstate.cs.cloud.restful.models.Story;public interface StoryRepository extends JpaRepository<Story, String> {}

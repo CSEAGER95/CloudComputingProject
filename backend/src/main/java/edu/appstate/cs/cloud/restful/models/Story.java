@@ -1,19 +1,35 @@
 package edu.appstate.cs.cloud.restful.models;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 
+@Entity
 @JsonRootName(value = Story.Story)
 public class Story {
+    @Id
+    public String id;
+
+    @Column
     public String prompt;
+
+    @Column(length = 10000)  // For long text
     public String story;
+
+    @Column
     public long upvotes;
+
+    @Column
     public long downvotes;
-    public String id;  // Added to store the entity ID
 
     public static final String Story = "story";
     public static final String Prompt = "prompt";
     public static final String Upvotes = "upvotes";
     public static final String Downvotes = "downvotes";
+
+    // Default constructor required by JPA
+    public Story() {}
 
     public Story(Builder builder) {
         this.prompt = builder.prompt;
