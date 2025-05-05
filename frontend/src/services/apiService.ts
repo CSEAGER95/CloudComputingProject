@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use the environment variable or fallback to localhost in development
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_URL = 'https://teamprojectmccewenseager.ue.r.appspot.com';
 
 // Create an axios instance with default config
 const apiClient = axios.create({

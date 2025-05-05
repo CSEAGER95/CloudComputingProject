@@ -3,6 +3,7 @@ package edu.appstate.cs.cloud.restful.datastore;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import edu.appstate.cs.cloud.restful.models.Prompt;
 import edu.appstate.cs.cloud.restful.models.Story;
@@ -21,6 +22,10 @@ public class PromptService {
     }
 
     public Story saveStory(Story story) {
+        // Generate a unique ID if one doesn't exist
+        if (story.getId() == null || story.getId().isEmpty()) {
+            story.setId(UUID.randomUUID().toString());
+        }
         stories.add(story);
         return story;
     }

@@ -26,6 +26,11 @@ public class PromptEndpoint {
     @Autowired
     private PromptService promptService;
 
+    @GetMapping("/")
+    public List<Story> getAllStoriesRoot() {
+        return promptService.getAllStories();
+    }
+
     @GetMapping("/stories")
     public List<Story> getAllStories() {
         return promptService.getAllStories();
@@ -40,6 +45,11 @@ public class PromptEndpoint {
     public boolean initCourses() {
         // Create some sample courses
         return true;
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("Backend is working!");
     }
 
     @PostMapping(value = "/story")
