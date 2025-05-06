@@ -23,6 +23,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.cloud.vertexai.VertexAI;
+import com.google.cloud.vertexai.api.GenerateContentResponse;
+import com.google.cloud.vertexai.generativeai.GenerativeModel;
+import com.google.cloud.vertexai.generativeai.ResponseHandler;
+
 
 @RestController
 @RequestMapping(value = "/prompt")
@@ -231,6 +236,35 @@ public ResponseEntity<String> entityDetails() {
     } catch (Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Failed to get entity structure: " + e.getMessage());
+    }
+}
+@GetMapping("/testvertex")
+public ResponseEntity<String> testVertexAI() {
+    try {
+        // Log details about the environment
+        logger.info("Testing Vertex AI connection...");
+        logger.info("Project ID: teamprojectmccewenseager");
+        logger.info("Region: us-east1");
+        
+        // Initialize Vertex AI
+        VertexAI vertexAi = new VertexAI("teamprojectmccewenseager", "us-east1");
+        logger.info("VertexAI initialized successfully");
+        
+        // Create a model with minimal capabilities
+        GenerativeModel model = new GenerativeModel("gemini-1.0-pro", vertexAi);
+        logger.info("GenerativeModel created successfully");
+        
+        // Test with minimal prompt
+        GenerateContentResponse response = model.generateContent("Hello world");
+        String result = ResponseHandler.getText(response);
+        logger.info("Successfully received response from Vertex AI");
+        
+        return ResponseEntity.ok("Vertex AI authentication successful!\nResponse: " + result);
+    } catch (Exception e) {
+        logger.error("Vertex AI authentication error", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Authentication error: " + e.getMessage() + "\n\nStack trace: " + 
+                  Arrays.toString(e.getStackTrace()).substring(0, 500));
     }
 }
 }

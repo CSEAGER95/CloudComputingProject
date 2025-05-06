@@ -8,6 +8,10 @@ public class Prompt {
 
     public static final String PROMPT  = "prompt";
 
+    public Prompt() {
+        // Required for Jackson deserialization
+    }
+
     public Prompt(Builder builder) {
         this.prompt = builder.prompt;
     }
