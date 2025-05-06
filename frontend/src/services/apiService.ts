@@ -10,10 +10,10 @@ export interface Story {
   downvotes: number;
 }
 
-// Use the environment variable or fallback to the hardcoded URL
-const API_URL = process.env.REACT_APP_API_URL || 'https://teamprojectmccewenseager.ue.r.appspot.com';
+// Use the global API_URL set in App.tsx
+const API_URL = window.API_URL || 'https://teamprojectmccewenseager.ue.r.appspot.com';
 
-console.log('API URL configured as:', API_URL);
+console.log('apiService initialized with API URL:', API_URL);
 
 // Create an axios instance with improved configuration
 const apiClient = axios.create({
@@ -30,32 +30,11 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   config => {
     console.log(`Request: ${config.method?.toUpperCase()} ${config.url}`, config.data);
+    console.log('Full URL:', `${API_URL}${config.url}`); // Log the full URL for debugging
     return config;
   },
   error => {
     console.error('Request error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Debug interceptor for responses
-apiClient.interceptors.response.use(
-  response => {
-    console.log(`Response from ${response.config.url}:`, response.status, response.data);
-    return response;
-  },
-  error => {
-    if (axios.isAxiosError(error)) {
-      console.error('API Error:', {
-        url: error.config?.url,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
-    } else {
-      console.error('Unknown error:', error);
-    }
     return Promise.reject(error);
   }
 );
@@ -81,94 +60,55 @@ const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> =>
 
 // API methods with improved error handling and retry
 export const apiService = {
-  // Test connection to backend
-  testConnection: async (): Promise<any> => {
+  // Fetch all stories with retry
+  getStories: async (): Promise<Story[]> => {
+    console.log('Fetching stories from:', `${API_URL}/prompt`);
     try {
-      console.log('Testing backend connection');
-      const response = await apiClient.get('/prompt/test');
-      console.log('Backend connection successful');
-      return response.data;
+      const response = await fetch(`${API_URL}/prompt`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Stories fetched successfully:', data);
+      return data;
     } catch (error) {
-      console.error('Backend connection failed:', error);
+      console.error('Error fetching stories:', error);
       throw error;
     }
   },
-
-  // Fetch all stories with retry
-  getStories: async (): Promise<Story[]> => {
-    console.log('Fetching stories');
-    return withRetry(async () => {
-      try {
-        const response = await apiClient.get('/prompt');
-        console.log(`Retrieved ${response.data.length} stories`);
-        return response.data;
-      } catch (error) {
-        console.error('Failed to fetch stories:', error);
-        throw error;
-      }
-    });
-  },
   
-  // Create a new story with better error handling
+  // Create a new story
   createStory: async (prompt: string): Promise<Story> => {
-    console.log('Creating story with prompt:', prompt.substring(0, 30) + '...');
-    return withRetry(async () => {
-      try {
-        // Send as proper JSON
-        const response = await apiClient.post('/prompt/story', { prompt });
-        console.log('Story created successfully with ID:', response.data.id);
-        return response.data;
-      } catch (error) {
-        console.error('Failed to create story:', error);
-        // Try alternative format if first attempt failed
-        if (axios.isAxiosError(error) && error.response?.status === 400) {
-          console.log('Trying alternative request format...');
-          const altResponse = await apiClient.post('/prompt/story', JSON.stringify({ prompt }));
-          return altResponse.data;
-        }
-        throw error;
-      }
-    });
-  },
-  
-  // Upvote a story
-  upvoteStory: async (storyId: string): Promise<Story> => {
-    console.log('Upvoting story:', storyId);
-    return withRetry(async () => {
-      const response = await apiClient.post(`/prompt/upvote/${storyId}`);
-      console.log('Story upvoted successfully');
-      return response.data;
-    });
-  },
-  
-  // Downvote a story
-  downvoteStory: async (storyId: string): Promise<Story> => {
-    console.log('Downvoting story:', storyId);
-    return withRetry(async () => {
-      const response = await apiClient.post(`/prompt/downvote/${storyId}`);
-      console.log('Story downvoted successfully');
-      return response.data;
-    });
-  },
-  
-  // Get API debug info
-  getDebugInfo: async (): Promise<Record<string, any>> => {
+    console.log('Creating story at:', `${API_URL}/prompt/story`);
     try {
-      return {
-        apiUrl: API_URL,
-        timestamp: new Date().toISOString(),
-        endpoints: {
-          test: await apiClient.get('/prompt/test').then(() => 'OK').catch(e => e.message),
-          stories: await apiClient.get('/prompt').then(r => `OK (${r.data.length} stories)`).catch(e => e.message),
-          testdatastore: await apiClient.get('/prompt/testdatastore').then(() => 'OK').catch(e => e.message)
-        }
-      };
+      const response = await fetch(`${API_URL}/prompt/story`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        body: JSON.stringify({ prompt })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Story created successfully:', data);
+      return data;
     } catch (error) {
-      return {
-        apiUrl: API_URL,
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+      console.error('Error creating story:', error);
+      throw error;
     }
   }
 };
