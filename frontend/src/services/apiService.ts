@@ -1,5 +1,14 @@
-// Updated apiService.ts with debugging
+// src/services/apiService.ts
 import axios from 'axios';
+
+// Define interface for Story data
+export interface Story {
+  id: string;
+  prompt: string;
+  story: string;
+  upvotes: number;
+  downvotes: number;
+}
 
 // Use the environment variable or fallback to the hardcoded URL
 const API_URL = process.env.REACT_APP_API_URL || 'https://teamprojectmccewenseager.ue.r.appspot.com';
@@ -7,7 +16,6 @@ const API_URL = process.env.REACT_APP_API_URL || 'https://teamprojectmccewenseag
 console.log('API URL configured as:', API_URL);
 
 // Create an axios instance with improved configuration
-// Add proper CORS handling in apiClient configuration
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
@@ -15,7 +23,6 @@ const apiClient = axios.create({
     'Accept': 'application/json'
   },
   timeout: 15000,
-  // Important: Don't use credentials for simple CORS requests
   withCredentials: false
 });
 
@@ -54,8 +61,8 @@ apiClient.interceptors.response.use(
 );
 
 // Helper function for retrying failed requests
-const withRetry = async (fn, maxRetries = 3) => {
-  let lastError;
+const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> => {
+  let lastError: any;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
@@ -75,7 +82,7 @@ const withRetry = async (fn, maxRetries = 3) => {
 // API methods with improved error handling and retry
 export const apiService = {
   // Test connection to backend
-  testConnection: async () => {
+  testConnection: async (): Promise<any> => {
     try {
       console.log('Testing backend connection');
       const response = await apiClient.get('/prompt/test');
@@ -88,7 +95,7 @@ export const apiService = {
   },
 
   // Fetch all stories with retry
-  getStories: async () => {
+  getStories: async (): Promise<Story[]> => {
     console.log('Fetching stories');
     return withRetry(async () => {
       try {
@@ -103,7 +110,7 @@ export const apiService = {
   },
   
   // Create a new story with better error handling
-  createStory: async (prompt) => {
+  createStory: async (prompt: string): Promise<Story> => {
     console.log('Creating story with prompt:', prompt.substring(0, 30) + '...');
     return withRetry(async () => {
       try {
@@ -125,7 +132,7 @@ export const apiService = {
   },
   
   // Upvote a story
-  upvoteStory: async (storyId) => {
+  upvoteStory: async (storyId: string): Promise<Story> => {
     console.log('Upvoting story:', storyId);
     return withRetry(async () => {
       const response = await apiClient.post(`/prompt/upvote/${storyId}`);
@@ -135,7 +142,7 @@ export const apiService = {
   },
   
   // Downvote a story
-  downvoteStory: async (storyId) => {
+  downvoteStory: async (storyId: string): Promise<Story> => {
     console.log('Downvoting story:', storyId);
     return withRetry(async () => {
       const response = await apiClient.post(`/prompt/downvote/${storyId}`);
@@ -145,7 +152,7 @@ export const apiService = {
   },
   
   // Get API debug info
-  getDebugInfo: async () => {
+  getDebugInfo: async (): Promise<Record<string, any>> => {
     try {
       return {
         apiUrl: API_URL,
@@ -160,7 +167,7 @@ export const apiService = {
       return {
         apiUrl: API_URL,
         timestamp: new Date().toISOString(),
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
