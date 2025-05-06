@@ -24,8 +24,6 @@ public class RestfulApplication {
 							.allowedOrigins("*")  // Or specify your frontend URL
 							.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 							.allowedHeaders("*")
-							.exposedHeaders("Access-Control-Allow-Origin")
-							.allowCredentials(false)
 							.maxAge(3600);  // Cache preflight for 1 hour
 				}
 			};
