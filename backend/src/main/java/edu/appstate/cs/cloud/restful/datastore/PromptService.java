@@ -17,6 +17,7 @@ import com.google.cloud.datastore.Key;
 
 @Service
 public class PromptService {
+    private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
     private final Datastore datastore;
     private final KeyFactory storyKeyFactory;
 
@@ -85,7 +86,7 @@ public class PromptService {
                 stories.add(story);
             } catch (Exception e) {
                 // Log the error but continue processing other entities
-                System.err.println("Error processing entity: " + e.getMessage());
+                logger.error("Error processing entity: {}", e.getMessage(), e);
             }
         }
         
@@ -204,9 +205,6 @@ public class PromptService {
         }
     }
     
-    /**
-     * Get all entity kinds in the Datastore
-     */
     public List<String> getAllKinds() {
         try {
             // Query for all keys
@@ -221,14 +219,11 @@ public class PromptService {
             
             return new ArrayList<>(kinds);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to get kinds: {}", e.getMessage(), e);
             return new ArrayList<>();
         }
     }
     
-    /**
-     * Check for existence of entities with a specific kind
-     */
     public boolean checkKindExists(String kind) {
         try {
             Query<Entity> query = Query.newEntityQueryBuilder()
@@ -239,7 +234,7 @@ public class PromptService {
             QueryResults<Entity> results = datastore.run(query);
             return results.hasNext();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to check kind: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -281,8 +276,6 @@ public class PromptService {
         }
     }
 
-    // Add at the top of the class:
-private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
     public Story saveStoryWithLogging(Story story) {
         try {
             logger.info("Attempting to save story with ID: {}", 

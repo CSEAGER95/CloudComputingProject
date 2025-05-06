@@ -19,42 +19,6 @@ const apiClient = axios.create({
   withCredentials: false
 });
 
-// Enhanced createStory method
-createStory: async (prompt: string): Promise<Story> => {
-  console.log('Creating story with prompt:', prompt);
-  try {
-    // First try with standard request format
-    return await apiClient.post('/prompt/story', { prompt });
-  } catch (error) {
-    console.error('Initial request failed:', error);
-    
-    // Try again with a different format if first attempt fails
-    if (axios.isAxiosError(error) && 
-        (error.code === 'CORS_ERROR' || error.message.includes('CORS') || 
-         error.message.includes('Network Error'))) {
-      
-      console.log('CORS issue detected, trying alternative approach...');
-      
-      // Try direct fetch API as a fallback
-      const response = await fetch(`${API_URL}/prompt/story`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt }),
-        mode: 'cors'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
-      }
-      
-      return await response.json();
-    }
-    throw error;
-  }
-}
-
 // Debug interceptor for requests
 apiClient.interceptors.request.use(
   config => {
