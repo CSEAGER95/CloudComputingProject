@@ -5,6 +5,7 @@ import Form from './components/Form';
 import StoryList from './components/StoryList';
 import apiService from './services/apiService';
 import ApiDebugger from './components/ApiDebugger';
+import ApiDebugTool from './components/ApiDebugTool';
 
 function App() {
   const [debugMode, setDebugMode] = useState(false);
@@ -97,7 +98,7 @@ function App() {
           )}
         </p>
       </footer>
-      
+      <ApiDebugTool />
       <ApiDebugger />
     </div>
   );

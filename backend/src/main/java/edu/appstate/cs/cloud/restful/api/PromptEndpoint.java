@@ -41,8 +41,20 @@ public class PromptEndpoint {
     private PromptService promptService;
 
     @GetMapping("/")
-    public List<Story> getAllStoriesRoot() {
-        return promptService.getAllStories();
+    public ResponseEntity<List<Story>> getAllStoriesRoot() {
+        try {
+            logger.info("Fetching all stories");
+            List<Story> stories = promptService.getAllStories();
+            logger.info("Retrieved {} stories", stories.size());
+            return ResponseEntity.ok()
+                .header("Access-Control-Allow-Origin", "*") // Add CORS headers explicitly
+                .header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                .header("Access-Control-Allow-Headers", "Content-Type")
+                .body(stories);
+        } catch (Exception e) {
+            logger.error("Error fetching stories", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping("/stories")
@@ -265,6 +277,30 @@ public ResponseEntity<String> testVertexAI() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Authentication error: " + e.getMessage() + "\n\nStack trace: " + 
                   Arrays.toString(e.getStackTrace()).substring(0, 500));
+    }
+}
+@GetMapping("/simplestories")
+public ResponseEntity<?> getSimpleStories() {
+    try {
+        List<Story> stories = promptService.getAllStories();
+        
+        // Log everything
+        logger.info("Retrieved {} stories", stories.size());
+        for (Story story : stories) {
+            logger.info("Story: id={}, prompt={}", story.getId(), story.getPrompt());
+        }
+        
+        // Add explicit CORS headers
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", "GET, OPTIONS")
+            .header("Access-Control-Allow-Headers", "Content-Type")
+            .body(stories);
+    } catch (Exception e) {
+        logger.error("Error fetching simple stories", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .header("Access-Control-Allow-Origin", "*")
+            .body("Error: " + e.getMessage());
     }
 }
 }
