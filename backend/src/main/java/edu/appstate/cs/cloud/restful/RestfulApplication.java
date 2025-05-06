@@ -23,7 +23,7 @@ public class RestfulApplication {
 					registry.addMapping("/**")
 							.allowedOrigins(
 								"http://localhost:3000", 
-								"https://mcseager-frontend-abcdef.a.run.app"
+								"https://mcseager-frontend-236280442449.us-east1.run.app/"
 							)
 							.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 							.allowedHeaders("Content-Type", "Authorization")
