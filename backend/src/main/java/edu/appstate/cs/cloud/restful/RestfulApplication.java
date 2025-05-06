@@ -21,10 +21,13 @@ public class RestfulApplication {
 				@Override
 				public void addCorsMappings(CorsRegistry registry) {
 					registry.addMapping("/**")
-							.allowedOrigins("*")  // Or specify your frontend URL
+							.allowedOrigins(
+								"http://localhost:3000", 
+								"https://mcseager-frontend-abcdef.a.run.app"
+							)
 							.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-							.allowedHeaders("*")
-							.maxAge(3600);  // Cache preflight for 1 hour
+							.allowedHeaders("Content-Type", "Authorization")
+							.maxAge(3600); // Cache preflight for 1 hour
 				}
 			};
 		}

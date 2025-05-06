@@ -1,32 +1,23 @@
+# Improved frontend/Dockerfile
 FROM node:18-alpine as build
 WORKDIR /app
 
-# Copy package files first for better caching
+# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production
 
-# Copy all source files
+# Copy source files and build
 COPY . ./
-
-# Set the API URL explicitly using build arg
-ARG REACT_APP_API_URL=https://teamprojectmccewenseager.ue.r.appspot.com
+ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
-
-# Log the URL being used
-RUN echo "Building with API URL: $REACT_APP_API_URL"
-
-# Build the app with the environment variable
 RUN npm run build
 
+# Production stage with nginx
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
 
-# Add a startup script that injects the API URL into the app at runtime
-RUN echo '#!/bin/sh \n \
-    echo "window.API_URL=\"'$REACT_APP_API_URL'\";" > /usr/share/nginx/html/config.js \n \
-    nginx -g "daemon off;"' > /docker-entrypoint.sh && \
-    chmod +x /docker-entrypoint.sh
-
-CMD ["/docker-entrypoint.sh"]
+# Use environment variables at runtime with proper escaping
+COPY start-nginx.sh /start-nginx.sh
+RUN chmod +x /start-nginx.sh
+CMD ["/start-nginx.sh"]
