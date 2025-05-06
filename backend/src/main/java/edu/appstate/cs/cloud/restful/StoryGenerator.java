@@ -31,7 +31,19 @@ public class StoryGenerator {
 
   // Passes the provided text input to the Gemini model and returns the text-only response.
   // For the specified textPrompt, the model returns a list of possible store names.
+  private boolean initializationAttempted = false;
   public String generate(String textPrompt) throws IOException {
+    if (vertexAi == null && !initializationAttempted) {
+      try {
+          vertexAi = new VertexAI("teamprojectmccewenseager", "us-east1");
+          aiInitialized = true;
+          logger.info("VertexAI initialized successfully");
+      } catch (Exception e) {
+          logger.error("Failed to initialize VertexAI: {}", e.getMessage(), e);
+          aiInitialized = false;
+          initializationAttempted = true;
+      }
+    }
     if (!aiInitialized) {
       logger.warn("VertexAI not properly initialized, returning fallback response");
       return generateFallbackStory(textPrompt);

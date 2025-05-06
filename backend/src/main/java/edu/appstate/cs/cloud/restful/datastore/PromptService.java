@@ -1,6 +1,7 @@
 // Update PromptService.java to use Google Datastore
 package edu.appstate.cs.cloud.restful.datastore;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.cloud.datastore.*;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -20,9 +21,28 @@ public class PromptService {
     private final KeyFactory storyKeyFactory;
 
     public PromptService() {
-        // Initialize the Datastore client
-        this.datastore = DatastoreOptions.getDefaultInstance().getService();
+        // Initialize datastore and factory once
+        this.datastore = initializeDatastore();
         this.storyKeyFactory = datastore.newKeyFactory().setKind("story");
+    }
+    
+    private Datastore initializeDatastore() {
+        try {
+            Datastore ds = DatastoreOptions.newBuilder()
+                .setProjectId("teamprojectmccewenseager")
+                .build()
+                .getService();
+                
+            // Test connection
+            Query<Key> testQuery = Query.newKeyQueryBuilder().setKind("story").setLimit(1).build();
+            ds.run(testQuery);
+            
+            logger.info("Successfully connected to Datastore");
+            return ds;
+        } catch (Exception e) {
+            logger.error("Failed to initialize Datastore: {}", e.getMessage(), e);
+            return DatastoreOptions.getDefaultInstance().getService();
+        }
     }
 
     public List<Story> getAllStories() {
@@ -258,6 +278,21 @@ public class PromptService {
             return response.toString();
         } catch (Exception e) {
             return "Failed to examine entity structure: " + e.getMessage();
+        }
+    }
+
+    // Add at the top of the class:
+private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
+    public Story saveStoryWithLogging(Story story) {
+        try {
+            logger.info("Attempting to save story with ID: {}", 
+                       story.getId() != null ? story.getId() : "null");
+            Story savedStory = saveStory(story);
+            logger.info("Successfully saved story with ID: {}", savedStory.getId());
+            return savedStory;
+        } catch (Exception e) {
+            logger.error("Error saving story: {}", e.getMessage(), e);
+            throw e;
         }
     }
 }

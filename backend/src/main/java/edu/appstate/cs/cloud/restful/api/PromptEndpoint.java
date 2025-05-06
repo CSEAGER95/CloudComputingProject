@@ -19,6 +19,11 @@ import edu.appstate.cs.cloud.restful.datastore.PromptService;
 import edu.appstate.cs.cloud.restful.models.Prompt;
 import edu.appstate.cs.cloud.restful.models.Story;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+
 @RestController
 @RequestMapping(value = "/prompt")
 public class PromptEndpoint {
@@ -130,9 +135,16 @@ public class PromptEndpoint {
                 return new ResponseEntity<>("Prompt cannot be empty", HttpStatus.BAD_REQUEST);
             }
             
-            // Generate story using StoryGenerator
-            String storyText = storyGenerator.generate(prompt.getPrompt());
-            logger.info("Generated story successfully");
+            // Generate story using StoryGenerator with better error handling
+            String storyText;
+            try {
+                storyText = storyGenerator.generate(prompt.getPrompt());
+                logger.info("Generated story successfully");
+            } catch (Exception e) {
+                logger.error("Error generating story with AI: {}", e.getMessage(), e);
+                // Use fallback story
+                storyText = "Unable to generate AI story. Here's a placeholder: Once upon a time, there was a prompt about " + prompt.getPrompt();
+            }
             
             // Create and save the story entity
             Story story = new Story.Builder()
@@ -143,17 +155,20 @@ public class PromptEndpoint {
                 .build();
             
             // Save to datastore
-            logger.info("Saving story to datastore");
-            Story savedStory = promptService.saveStory(story);
-            logger.info("Story saved with ID: {}", savedStory.getId());
-            
-            return new ResponseEntity<>(savedStory, HttpStatus.CREATED);
+            try {
+                logger.info("Saving story to datastore");
+                Story savedStory = promptService.saveStoryWithLogging(story);
+                logger.info("Story saved with ID: {}", savedStory.getId());
+                return new ResponseEntity<>(savedStory, HttpStatus.CREATED);
+            } catch (Exception e) {
+                logger.error("Failed to save to datastore: {}", e.getMessage(), e);
+                return new ResponseEntity<>("Story was generated but couldn't be saved: " + e.getMessage(), 
+                                          HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         } catch (Exception e) {
-            logger.error("Error creating story", e);
-            return new ResponseEntity<>(
-                "Error creating story: " + e.getMessage(), 
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
+            logger.error("Unexpected error creating story", e);
+            return new ResponseEntity<>("Error creating story: " + e.getMessage(), 
+                                      HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -178,4 +193,44 @@ public class PromptEndpoint {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/datastoretest")
+public ResponseEntity<String> testDatastore() {
+    try {
+        // Use existing methods instead of direct field access
+        String datastoreInfo = promptService.getDatastoreInfo();
+        
+        // Create a test story
+        String testId = "test-" + System.currentTimeMillis();
+        Story testStory = new Story.Builder()
+            .withId(testId)
+            .withPrompt("Test prompt for debugging")
+            .withStory("This is a test story created for debugging.")
+            .withUpvotes(0)
+            .withDownvotes(0)
+            .build();
+        
+        // Save using existing method
+        Story savedStory = promptService.saveStory(testStory);
+        
+        return ResponseEntity.ok("Datastore test:\n" +
+                               "Connection info: " + datastoreInfo + "\n" +
+                               "Test save successful with ID: " + savedStory.getId());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Datastore test failed: " + e.getMessage());
+    }
+}
+
+@GetMapping("/entitydetails") 
+public ResponseEntity<String> entityDetails() {
+    try {
+        // Get structure info through the service method
+        String entityStructure = promptService.getEntityStructure();
+        return ResponseEntity.ok(entityStructure);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Failed to get entity structure: " + e.getMessage());
+    }
+}
 }
