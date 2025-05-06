@@ -2,6 +2,8 @@ package edu.appstate.cs.cloud.restful.api;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +19,11 @@ import edu.appstate.cs.cloud.restful.datastore.PromptService;
 import edu.appstate.cs.cloud.restful.models.Prompt;
 import edu.appstate.cs.cloud.restful.models.Story;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 @RestController
 @RequestMapping(value = "/prompt")
 public class PromptEndpoint {
+    private static final Logger logger = LoggerFactory.getLogger(PromptEndpoint.class);
+    
     @Autowired
     private StoryGenerator storyGenerator;
 
@@ -42,12 +43,6 @@ public class PromptEndpoint {
     @GetMapping("/prompts")
     public List<Prompt> getAllPrompts() {
         return promptService.getAllPrompts();
-    }
-
-    @GetMapping(value = "/init")
-    public boolean initCourses() {
-        // Create some sample courses
-        return true;
     }
 
     @GetMapping("/test")
@@ -80,6 +75,7 @@ public class PromptEndpoint {
             
             return ResponseEntity.ok(response.toString());
         } catch (Exception e) {
+            logger.error("Datastore connection failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Datastore connection failed: " + e.getMessage());
         }
@@ -118,72 +114,25 @@ public class PromptEndpoint {
             
             return ResponseEntity.ok(response.toString());
         } catch (Exception e) {
+            logger.error("Failed to create test story", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to create test story: " + e.getMessage() + "\n" + e.getStackTrace()[0]);
         }
     }
 
-    @GetMapping("/debugdatastore")
-    public ResponseEntity<?> debugDatastore() {
-        try {
-            StringBuilder response = new StringBuilder();
-            
-            // Get connection info
-            String datastoreInfo = promptService.getDatastoreInfo();
-            response.append(datastoreInfo).append("\n\n");
-            
-            // Get all kinds in the datastore
-            List<String> kinds = promptService.getAllKinds();
-            response.append("Entity kinds found: ").append(kinds.size()).append("\n");
-            if (!kinds.isEmpty()) {
-                response.append("Kinds: ").append(String.join(", ", kinds)).append("\n\n");
-            }
-            
-            // Check if Story kind exists
-            boolean storyKindExists = promptService.checkKindExists("Story");
-            response.append("Story kind exists: ").append(storyKindExists).append("\n");
-            
-            // Check if lowercase "story" kind exists
-            boolean lowercaseStoryKindExists = promptService.checkKindExists("story");
-            response.append("story (lowercase) kind exists: ").append(lowercaseStoryKindExists).append("\n\n");
-            
-            // Try to get all stories
-            List<Story> stories = promptService.getAllStories();
-            response.append("Stories found: ").append(stories.size()).append("\n");
-            
-            // Add details about each story if any were found
-            if (!stories.isEmpty()) {
-                response.append("Story details:\n");
-                for (Story story : stories) {
-                    response.append("- ID: ").append(story.getId())
-                        .append(", Prompt: \"").append(story.getPrompt().substring(0, Math.min(30, story.getPrompt().length()))).append("...\"\n");
-                }
-            }
-            
-            return ResponseEntity.ok(response.toString());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Debug failed: " + e.getMessage() + "\n" + e.getStackTrace()[0]);
-        }
-    }
-
-    @GetMapping("/entitydetails")
-    public ResponseEntity<?> getEntityDetails() {
-        try {
-            // Use your existing promptService to get the structure information
-            String entityDetails = promptService.getEntityStructure();
-            return ResponseEntity.ok(entityDetails);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to examine entity structure: " + e.getMessage());
-        }
-    }
-
     @PostMapping(value = "/story")
     public ResponseEntity<?> createStory(@RequestBody Prompt prompt) {
+        logger.info("Received request to create story with prompt: {}", 
+                   prompt.getPrompt().substring(0, Math.min(50, prompt.getPrompt().length())));
+        
         try {
+            if (prompt.getPrompt() == null || prompt.getPrompt().trim().isEmpty()) {
+                return new ResponseEntity<>("Prompt cannot be empty", HttpStatus.BAD_REQUEST);
+            }
+            
             // Generate story using StoryGenerator
             String storyText = storyGenerator.generate(prompt.getPrompt());
+            logger.info("Generated story successfully");
             
             // Create and save the story entity
             Story story = new Story.Builder()
@@ -194,11 +143,17 @@ public class PromptEndpoint {
                 .build();
             
             // Save to datastore
+            logger.info("Saving story to datastore");
             Story savedStory = promptService.saveStory(story);
+            logger.info("Story saved with ID: {}", savedStory.getId());
+            
             return new ResponseEntity<>(savedStory, HttpStatus.CREATED);
         } catch (Exception e) {
-            System.err.println("Error creating story: " + e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("Error creating story", e);
+            return new ResponseEntity<>(
+                "Error creating story: " + e.getMessage(), 
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
     
@@ -208,7 +163,7 @@ public class PromptEndpoint {
             Story story = promptService.upvoteStory(storyId);
             return new ResponseEntity<>(story, HttpStatus.OK);
         } catch (Exception e) {
-            System.err.println("Error upvoting story: " + e.getMessage());
+            logger.error("Error upvoting story: {}", e.getMessage(), e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -219,7 +174,7 @@ public class PromptEndpoint {
             Story story = promptService.downvoteStory(storyId);
             return new ResponseEntity<>(story, HttpStatus.OK);
         } catch (Exception e) {
-            System.err.println("Error downvoting story: " + e.getMessage());
+            logger.error("Error downvoting story: {}", e.getMessage(), e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
