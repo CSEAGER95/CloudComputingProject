@@ -1,5 +1,6 @@
 // src/components/Form.tsx
 import React, { useState } from 'react';
+import { api } from '../services/api';
 import Button from './Button';
 
 const Form: React.FC = () => {
@@ -7,9 +8,12 @@ const Form: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
-
-  const apiUrl = window.API_URL;
-  console.log('Form using API URL:', apiUrl);
+  
+  // Custom event for story creation
+  const createCustomEvent = () => {
+    const event = new CustomEvent('storyCreated', { detail: { timestamp: new Date() } });
+    document.dispatchEvent(event);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,30 +27,20 @@ const Form: React.FC = () => {
     setError(null);
     
     try {
-      console.log('Submitting prompt to:', `${apiUrl}/prompt/story`);
-      const response = await fetch(`${apiUrl}/prompt/story`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
-        body: JSON.stringify({ prompt: prompt })
-      });
+      // Use the api service instead of direct fetch
+      await api.createStory(prompt);
       
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log('Story created successfully:', data);
+      // Clear form and show success
       setSuccess(true);
       setPrompt('');
+      
+      // Emit event for other components to refresh
+      createCustomEvent();
       
       // Hide success message after 5 seconds
       setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
-      console.error('Error creating story:', err);
+      console.error('Error in form submission:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error: ${errorMessage}`);
     } finally {
@@ -57,8 +51,8 @@ const Form: React.FC = () => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="prompt" style={{ display: 'block', marginBottom: '10px' }}>
-          Enter a news headline or topic for satire generation
+        <label htmlFor="prompt" style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+          Enter a news headline or topic for satire generation:
         </label>
         <textarea
           id="prompt"
@@ -69,24 +63,38 @@ const Form: React.FC = () => {
             padding: '10px', 
             borderRadius: '5px', 
             border: '1px solid #ccc',
-            minHeight: '100px'
+            minHeight: '100px',
+            fontSize: '16px'
           }}
+          placeholder="Example: Local man discovers broccoli tastes better with cheese"
           required
         />
-        <div style={{ fontSize: '14px', marginTop: '5px' }}>
+        <div style={{ fontSize: '14px', marginTop: '5px', color: prompt.length < 10 ? '#d32f2f' : '#666' }}>
           Characters: {prompt.length}/10 minimum
         </div>
       </div>
       
       {error && (
-        <div style={{ color: 'red', marginTop: '10px' }}>
+        <div style={{ 
+          color: 'white', 
+          backgroundColor: '#d32f2f', 
+          padding: '10px', 
+          borderRadius: '5px', 
+          marginTop: '10px' 
+        }}>
           {error}
         </div>
       )}
       
       {success && (
-        <div style={{ color: 'green', marginTop: '10px' }}>
-          Your prompt was submitted successfully! Check the stories list below.
+        <div style={{ 
+          color: 'white', 
+          backgroundColor: '#4caf50', 
+          padding: '10px', 
+          borderRadius: '5px', 
+          marginTop: '10px' 
+        }}>
+          Your satire article was created successfully! Check the stories list below.
         </div>
       )}
       
@@ -97,7 +105,9 @@ const Form: React.FC = () => {
           disabled={isSubmitting || prompt.length < 10}
           style={{
             backgroundColor: '#0070f3',
-            opacity: isSubmitting || prompt.length < 10 ? 0.7 : 1
+            opacity: isSubmitting || prompt.length < 10 ? 0.7 : 1,
+            padding: '12px 24px',
+            fontSize: '16px'
           }}
         />
       </div>
