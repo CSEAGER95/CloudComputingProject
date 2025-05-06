@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+// Enhanced Form.tsx with better error handling
+import React, { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import axios from 'axios';
 import Button from './Button';
 import apiService from '../services/apiService';
 
@@ -10,6 +12,8 @@ interface FormInputs {
 const Form: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [backendStatus, setBackendStatus] = useState<'loading' | 'connected' | 'error'>('loading');
   
   const { register, handleSubmit, formState: { errors }, watch, reset } = useForm<FormInputs>({
     mode: 'onChange',
@@ -17,6 +21,21 @@ const Form: React.FC = () => {
       prompt: ''
     }
   });
+
+  // Test backend connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        await apiService.testConnection();
+        setBackendStatus('connected');
+      } catch (error) {
+        console.error('Backend connection test failed:', error);
+        setBackendStatus('error');
+      }
+    };
+    
+    testConnection();
+  }, []);
   
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (data.prompt.length < 10) {
@@ -24,13 +43,9 @@ const Form: React.FC = () => {
       return;
     }
 
-    if (data.prompt.length > 1000) {
-      alert('Prompt cannot be more than 1000 characters long');
-      return;
-    }
-
     setIsSubmitting(true);
     setSubmissionResult(null);
+    setErrorDetails(null);
 
     try {
       // Use the API service to create a new story
@@ -44,7 +59,25 @@ const Form: React.FC = () => {
       reset();
     } catch (error) {
       console.error('Error sending prompt:', error);
-      setSubmissionResult('There was an error submitting your prompt. Please try again.');
+      
+      // Provide detailed error message
+      let errorMessage = 'There was an error submitting your prompt. Please try again.';
+      let details = '';
+      
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          errorMessage += ` (Status: ${error.response.status})`;
+          details = JSON.stringify(error.response.data, null, 2);
+        } else if (error.request) {
+          errorMessage += ' (No response received from server)';
+          details = 'The request was made but no response was received. Check network connectivity.';
+        } else {
+          errorMessage += ` (${error.message})`;
+        }
+      }
+      
+      setSubmissionResult(errorMessage);
+      setErrorDetails(details);
     } finally {
       setIsSubmitting(false);
     }
@@ -55,6 +88,25 @@ const Form: React.FC = () => {
 
   return (
     <div className="form-container" style={{ maxWidth: '500px', margin: '0 auto' }}>
+      {/* Backend connection status */}
+      {backendStatus === 'loading' && (
+        <div style={{ marginBottom: '15px', color: 'blue', textAlign: 'center' }}>
+          Checking connection to backend...
+        </div>
+      )}
+      
+      {backendStatus === 'error' && (
+        <div style={{ marginBottom: '15px', color: 'red', textAlign: 'center', padding: '10px', backgroundColor: '#ffe6e6', borderRadius: '4px' }}>
+          Warning: Could not connect to the backend service. Form submissions may fail.
+        </div>
+      )}
+      
+      {backendStatus === 'connected' && (
+        <div style={{ marginBottom: '15px', color: 'green', textAlign: 'center' }}>
+          Connected to backend service ✓
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit(onSubmit)}>
         <div style={{ marginBottom: '15px' }}>
           <label htmlFor="prompt" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -91,10 +143,10 @@ const Form: React.FC = () => {
           <Button 
             text={isSubmitting ? "Submitting..." : "Generate Satire Article"} 
             type="submit"
-            disabled={!isValid || isSubmitting}
+            disabled={!isValid || isSubmitting || backendStatus === 'error'}
             style={{
-              opacity: (!isValid || isSubmitting) ? '0.5' : '1',
-              cursor: (!isValid || isSubmitting) ? 'not-allowed' : 'pointer',
+              opacity: (!isValid || isSubmitting || backendStatus === 'error') ? '0.5' : '1',
+              cursor: (!isValid || isSubmitting || backendStatus === 'error') ? 'not-allowed' : 'pointer',
               backgroundColor: '#0070f3',
               width: '100%'
             }}
@@ -112,6 +164,15 @@ const Form: React.FC = () => {
           }}
         >
           {submissionResult}
+          
+          {errorDetails && (
+            <details style={{ marginTop: '10px', fontSize: '12px' }}>
+              <summary>Error Details</summary>
+              <pre style={{ whiteSpace: 'pre-wrap', marginTop: '5px' }}>
+                {errorDetails}
+              </pre>
+            </details>
+          )}
         </div>
       )}
     </div>

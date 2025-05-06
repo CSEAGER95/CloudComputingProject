@@ -16,17 +16,20 @@ public class RestfulApplication {
 	}
 
 	@Bean
-	public WebMvcConfigurer corsConfigurer() {
-		return new WebMvcConfigurer() {
-			@Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Apply to all endpoints
-                        .allowedOrigins("*") // Allow all origins
-                        .allowedMethods("*") // Allow all HTTP methods
-                        .allowedHeaders("*"); // Allow all headers
-            }
-		};
-	}
+		public WebMvcConfigurer corsConfigurer() {
+			return new WebMvcConfigurer() {
+				@Override
+				public void addCorsMappings(CorsRegistry registry) {
+					registry.addMapping("/**")
+							.allowedOrigins("*")  // Or specify your frontend URL
+							.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+							.allowedHeaders("*")
+							.exposedHeaders("Access-Control-Allow-Origin")
+							.allowCredentials(false)
+							.maxAge(3600);  // Cache preflight for 1 hour
+				}
+			};
+		}
 	
 	// Add this Bean to fix the welcomePageHandlerMapping error
 	@Bean
