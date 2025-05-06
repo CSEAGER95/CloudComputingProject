@@ -1,10 +1,9 @@
-// App.tsx
 import React, { useEffect } from 'react';
 import './App.css';
 import Form from './components/Form';
 import StoryList from './components/StoryList';
 
-// Explicitly set the API URL in a global variable that will be accessible to all components
+// Explicitly set the API URL in a global variable
 window.API_URL = process.env.REACT_APP_API_URL || 'https://teamprojectmccewenseager.ue.r.appspot.com';
 console.log('Setting global API URL:', window.API_URL);
 
@@ -51,6 +50,11 @@ function App() {
       }}>
         <p>McSeager Spring 2025 • Cloud Computing Project</p>
       </footer>
+      
+      {/* API URL Display for debugging */}
+      <div style={{position: 'fixed', bottom: '5px', left: '5px', fontSize: '12px', color: '#999'}}>
+        API: {window.API_URL || 'not set'}
+      </div>
     </div>
   );
 }
