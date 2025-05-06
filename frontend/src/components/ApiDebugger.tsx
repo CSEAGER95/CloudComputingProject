@@ -1,6 +1,6 @@
 // src/components/ApiDebugger.tsx
 import React, { useState } from 'react';
-import apiService from '../services/apiService';
+import { apiService } from '../services/apiService';
 
 const ApiDebugger: React.FC = () => {
   const [visible, setVisible] = useState(false);
